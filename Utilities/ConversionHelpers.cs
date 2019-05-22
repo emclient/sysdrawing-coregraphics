@@ -87,8 +87,21 @@ namespace System.Drawing
 		}
 		
 		internal static CGColor ToCGColor (this Color color)
-		{				
-			return new CGColor(color.R / 255f, color.G/255f, color.B/255f, color.A/255f );
+		{
+			if (color.IsSystemColor) {
+				var knownColor = color.ToKnownColor ();
+				if (knownColor >= 0 && (int)knownColor < KnownColors.NativeColors.Length && KnownColors.NativeColors[(int)knownColor] != null) {
+					return KnownColors.NativeColors[(int)knownColor].CGColor;
+				}
+			}
+
+			long value = color.Value;
+			byte a = (byte) (value >> 24);
+			byte r = (byte) (value >> 16);
+			byte g = (byte) (value >> 8);
+			byte b = (byte) (value);
+
+			return new CGColor(r / 255f, g / 255f, b / 255f, a / 255f);
 		}
 		
 		internal static float ToRadians (this float degrees) 
