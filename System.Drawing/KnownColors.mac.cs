@@ -40,51 +40,82 @@ namespace System.Drawing
 
 	internal static partial class KnownColors
 	{
+		static internal NSColor[] NativeColors = new NSColor[(int)KnownColor.WindowText + 1];
+
 		static void Update ()
 		{
 			// note: Mono's SWF Theme class will call the static Update method to apply
 			// correct system colors outside Windows
 
-			ArgbValues [(int)KnownColor.ActiveBorder] = NSColor.WindowFrame.ToUArgb ();
+			NativeColors[(int)KnownColor.ActiveBorder] = NSColor.WindowFrame;
 			// KnownColor.ActiveCaption
 			// KnownColor.ActiveCaptionText
 			// KnownColor.AppWorkspace
-			ArgbValues [(int)KnownColor.Control] = NSColor.Control.ToUArgb ();
-			ArgbValues [(int)KnownColor.ControlText] = NSColor.ControlText.ToUArgb ();
-			ArgbValues [(int)KnownColor.ControlDark] = NSColor.ControlShadow.ToUArgb ();
-			ArgbValues [(int)KnownColor.ControlDarkDark] = NSColor.ControlDarkShadow.ToUArgb ();
-			ArgbValues [(int)KnownColor.ControlLight] = NSColor.ControlHighlight.ToUArgb ();
-			ArgbValues [(int)KnownColor.ControlLightLight] = NSColor.ControlLightHighlight.ToUArgb ();
+			NativeColors[(int)KnownColor.Control] = NSColor.Control;
+			NativeColors[(int)KnownColor.ControlText] = NSColor.ControlText;
+			NativeColors[(int)KnownColor.ControlDark] = NSColor.ControlShadow;
+			NativeColors[(int)KnownColor.ControlDarkDark] = NSColor.ControlDarkShadow;
+			NativeColors[(int)KnownColor.ControlLight] = NSColor.ControlHighlight;
+			NativeColors[(int)KnownColor.ControlLightLight] = NSColor.ControlLightHighlight;
 			// KnownColor.Desktop
-			ArgbValues [(int)KnownColor.GrayText] = NSColor.DisabledControlText.ToUArgb ();
+			NativeColors[(int)KnownColor.GrayText] = NSColor.DisabledControlText;
 			//ArgbValues[(int)KnownColor.Highlight] = NSColor.Highlight.ToUArgb();
-			ArgbValues [(int)KnownColor.Highlight] = NSColor.SelectedTextBackground.ToUArgb ();
-			ArgbValues [(int)KnownColor.HighlightText] = NSColor.SelectedText.ToUArgb ();
+			NativeColors[(int)KnownColor.Highlight] = NSColor.SelectedTextBackground;
+			NativeColors[(int)KnownColor.HighlightText] = NSColor.SelectedText;
 			// KnownColor.HighlightText
 			// KnownColor.HotTrack
 			// KnownColor.InactiveBorder
 			// KnownColor.InactiveCaption
 			// KnownColor.InactiveCaptionText
-			// KnownColor.Info
-			// KnownColor.InfoText
+			//NSColors[(int)KnownColor.Info] = NSColor.WindowBackground;
+			//NSColors[(int)KnownColor.InfoText] = NSColor.ControlText;
 			// KnownColor.Menu
 			// KnownColor.MenuText
-			ArgbValues [(int)KnownColor.ScrollBar] = NSColor.ScrollBar.ToUArgb ();
-			//ArgbValues[(int)KnownColor.Window] = NSColor.WindowBackground.ToUArgb();
-			//ArgbValues[(int)KnownColor.WindowFrame] = NSColor.WindowFrame.ToUArgb();
-			//ArgbValues[(int)KnownColor.WindowText] = NSColor.WindowFrameText.ToUArgb();
-			ArgbValues [(int)KnownColor.ButtonFace] = NSColor.Control.ToUArgb ();
-			ArgbValues [(int)KnownColor.ButtonHighlight] = NSColor.ControlHighlight.ToUArgb ();
-			ArgbValues [(int)KnownColor.ButtonShadow] = NSColor.ControlShadow.ToUArgb ();
+			NativeColors[(int)KnownColor.ScrollBar] = NSColor.ScrollBar;
+			NativeColors[(int)KnownColor.Window] = NSColor.WindowBackground;
+			NativeColors[(int)KnownColor.WindowText] = NSColor.WindowFrameText;
+			NativeColors[(int)KnownColor.WindowFrame] = NSColor.WindowFrame;
+			NativeColors[(int)KnownColor.ButtonFace] = NSColor.Control;
+			NativeColors[(int)KnownColor.ButtonHighlight] = NSColor.ControlHighlight;
+			NativeColors[(int)KnownColor.ButtonShadow] = NSColor.ControlShadow;
 			// KnownColor.GradientActiveCaption
 			// KnownColor.GradientInactiveCaption
 			// KnownColor.MenuBar
 			// KnownColor.MenuHighlight
 		}
 
-		static void WatchColorChanges ()
+		static long ConvertComponent (nfloat c)
 		{
-			NSNotificationCenter.DefaultCenter.AddObserver (new NSString ("NSSystemColorsDidChangeNotification"), (obj) => { Update (); });
+			return (byte)(c * 255);
+		}
+
+		static long FromSystemColor (KnownColor kc)
+		{
+			if (kc >= 0 && (int)kc <= NativeColors.Length && NativeColors[(int)kc] != null) {
+				nfloat r = 0, g = 0, b = 0, a = 0;
+				var rgba = NativeColors[(int)kc].UsingColorSpace (NSColorSpace.GenericRGBColorSpace);
+				if (rgba != null) {
+					rgba.GetRgba (out r, out g, out b, out a);
+				} else {
+					var cgc = NativeColors[(int)kc].CGColor; // 10.8+
+					if (cgc != null)
+					{
+						// FIXME: CMYK, other color spaces?
+						if (cgc.NumberOfComponents == 4) {
+							a = (float)cgc.Components[3];
+							r = (float)cgc.Components[0];
+							g = (float)cgc.Components[1];
+							b = (float)cgc.Components[2];
+						} else if (cgc.NumberOfComponents == 2) {
+							a = (float)cgc.Components[1];
+							r = g = b = (float)cgc.Components[0];
+						}
+					}
+				}
+				return (ConvertComponent (a) << 24) + (ConvertComponent (r) << 16) + (ConvertComponent (g) << 8) + ConvertComponent (b);
+			}
+
+			return ArgbValues[(int)kc];
 		}
 	}
 }

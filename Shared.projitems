@@ -13,6 +13,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)System.Drawing\Bitmap.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System.Drawing\Brush.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System.Drawing\Color.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)System.Drawing\ColorTable.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System.Drawing\Extensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System.Drawing\Font.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)System.Drawing\Font-CoreText.cs" />

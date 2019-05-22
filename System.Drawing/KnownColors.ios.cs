@@ -41,16 +41,15 @@ namespace System.Drawing
 
 	internal static partial class KnownColors
 	{
-		static void Update ()
-		{
-			// note: Mono's SWF Theme class will call the static Update method to apply
-			// correct system colors outside Windows
+		static internal UIColor[] NativeColors = new UIColor[(int)KnownColor.WindowText + 1];
 
+		static long FromSystemColor (KnownColor kc)
+		{
+			return ArgbValues[(int)kc];
 		}
 
-		static void WatchColorChanges ()
+		static void Update ()
 		{
-			NSNotificationCenter.DefaultCenter.AddObserver (new NSString ("NSSystemColorsDidChangeNotification"), (obj) => { Update (); });
 		}
 	}
 }

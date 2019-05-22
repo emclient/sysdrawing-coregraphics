@@ -84,7 +84,7 @@ namespace System.Drawing.Mac
 
 		public static CGColor ToCGColor (this Color c)
 		{
-			return new CGColor (c.R / 255f, c.G / 255f, c.B / 255f, c.A / 255f);
+			return ConversionHelpers.ToCGColor (c);
 		}
 
 		public static NSData ToNSData (this Image image, Imaging.ImageFormat format)
@@ -98,6 +98,6 @@ namespace System.Drawing.Mac
 		public static Bitmap ToBitmap (this CGImage cgImage)
 		{
 			return new Bitmap (cgImage);
-		}		
+		}
 	}
 }

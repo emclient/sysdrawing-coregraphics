@@ -37,7 +37,7 @@ namespace System.Drawing {
 
 	internal static partial class KnownColors
 	{
-		static internal uint[] ArgbValues = new uint[] {
+		static private uint[] ArgbValues = new uint[] {
 			0x00000000,	/* 000 - Empty */
 			0xFFD4D0C8,	/* 001 - ActiveBorder */
 			0xFF0054E3,	/* 002 - ActiveCaption */
@@ -215,7 +215,7 @@ namespace System.Drawing {
 			0xFF316AC5,	/* 174 - MenuHighlight */
 		};
 
-		static internal string[] Names = {
+		static private string[] Names = {
 			String.Empty,
 			"ActiveBorder",
 			"ActiveCaption",
@@ -393,68 +393,23 @@ namespace System.Drawing {
 			"MenuHighlight"
 		};
 
-		static Dictionary<String, uint> argbByName = null;
-		static Dictionary<uint, String> nameByArgb = null;
-
-		static internal Dictionary<String, uint> ArgbByName
+		public static long GetValue (KnownColor kc)
 		{
-			get
-			{
-				if (argbByName == null)
-				{
-					argbByName = new Dictionary<string, uint>();
-					for (int i = 0; i < ArgbValues.Length; ++i)
-						argbByName[Names[i]] = ArgbValues[i];
-				}
-				return argbByName;
+			if (kc >= KnownColor.ActiveBorder && kc <= KnownColor.WindowText) {
+				return FromSystemColor ((KnownColor)kc);
 			}
-		}
-
-		static internal Dictionary<uint, String> NameByArgb
-		{
-			get
-			{
-				if (nameByArgb == null)
-				{
-					nameByArgb = new Dictionary<uint, string>();
-					for (int i = 0; i < Names.Length; ++i)
-						nameByArgb[ArgbValues[i]] = Names[i];
-				}
-				return nameByArgb;
+			if (kc >= 0 && (int)kc < ArgbValues.Length) {
+				return ArgbValues[(int)kc];
 			}
-		}
-
-		public static Color FromKnownColor (KnownColor kc)
-		{
-			Color c;
-			short n = (short)kc;
-			if ((n <= 0) || (n >= ArgbValues.Length)) 
-				c = Color.FromArgb (0);
-			else
-				c = Color.FromArgb ((int)ArgbValues [n]);
-			return c;
-		}
-
-		public static string GetName (short kc)
-		{
-			if (kc > 0 && kc < Names.Length)
-				return Names[kc];
-			return String.Empty;
+			return 0;
 		}
 
 		public static string GetName (KnownColor kc)
 		{
-			return GetName ((short)kc);
-		}
-
-		public static Color FindColorMatch (Color c)
-		{
-			uint argb = (uint) c.ToArgb ();
-			for (int i = 0; i < KnownColors.ArgbValues.Length; i++) {
-				if (argb == KnownColors.ArgbValues [i])
-					return KnownColors.FromKnownColor ((KnownColor)i);
-                        }
-			return Color.Empty;
+			if (kc >= 0 && (int)kc < Names.Length) {
+				return Names[(int)kc];
+			}
+			return String.Empty;
 		}
 
 		// When this method is called, we teach any new color(s) to the Color class
@@ -464,10 +419,9 @@ namespace System.Drawing {
 			ArgbValues[knownColor] = (uint)color;
 		}
 
-		static KnownColors()
+		static KnownColors ()
 		{
-			Update();
-			WatchColorChanges ();
+			Update ();
 		}
 	}
 }
